@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "list",
-      "title": "gopass",
-      "description": "",
+      "title": "Search Gopass",
+      "description": "Search gopass entries and copy or autotype them.",
       "mode": "view"
     }
   ],
