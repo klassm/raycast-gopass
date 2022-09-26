@@ -8,14 +8,14 @@ import { AccountDetails } from "./gopass";
 type AutotypeCommand = () => Promise<void>;
 
 interface AutotypeHandlers {
-  [key: string]: AutotypeCommand
+  [key: string]: AutotypeCommand;
 }
 
 const strokes = {
   tab: 48,
   space: 49,
   enter: 36,
-  delete: 51
+  delete: 51,
 } as const;
 
 const specialAutotypeHandlers: AutotypeHandlers = {
@@ -24,19 +24,19 @@ const specialAutotypeHandlers: AutotypeHandlers = {
   ":enter": async () => doStroke(strokes.enter),
   ":delete": async () => doStroke(strokes.delete),
   ":delay": async () => sleep(1000),
-  ":clearField": async () => clearFieldContent()
-}
+  ":clearField": async () => clearFieldContent(),
+};
 
 function additionalAutotypeCommandToHandler(command: string): AutotypeCommand {
   return async () => {
     const result = await asyncExec(command);
     await doType(result);
-  }
+  };
 }
 
 async function loadAdditionalAutotypeHandlers(): Promise<AutotypeHandlers> {
-  const basePath = process.env.XDG_CONFIG ?? homedir()
-  const filename = `${ basePath }/.gopass_autotype_handlers.json`;
+  const basePath = process.env.XDG_CONFIG ?? homedir();
+  const filename = `${basePath}/.gopass_autotype_handlers.json`;
   if (!fs.existsSync(filename)) {
     return {};
   }
@@ -46,34 +46,33 @@ async function loadAdditionalAutotypeHandlers(): Promise<AutotypeHandlers> {
     const json = JSON.parse(buffer.toString("utf-8"));
     return mapValues(json, (command) => additionalAutotypeCommandToHandler(command));
   } catch (e) {
-    console.log(`Something went wrong parsing ${ filename }`, e)
+    console.log(`Something went wrong parsing ${filename}`, e);
     return {};
   }
 }
 
 async function allAutotypeHandlers(): Promise<AutotypeHandlers> {
   return {
-    ...await loadAdditionalAutotypeHandlers(),
-    ...specialAutotypeHandlers
-  }
+    ...(await loadAdditionalAutotypeHandlers()),
+    ...specialAutotypeHandlers,
+  };
 }
 
-
 async function doStroke(stroke: number) {
-  await asyncExec(`echo 'tell application "System Events" to key code "${ stroke }"' | osascript`)
+  await asyncExec(`echo 'tell application "System Events" to key code "${stroke}"' | osascript`);
 }
 
 async function doType(toType: string) {
-  await asyncExec(`echo 'tell application "System Events" to keystroke "${ toType }"' | osascript`)
+  await asyncExec(`echo 'tell application "System Events" to keystroke "${toType}"' | osascript`);
 }
 
 async function clearFieldContent() {
-  await asyncExec(`echo 'tell application "System Events" to keystroke "a" using command down' | osascript`)
+  await asyncExec(`echo 'tell application "System Events" to keystroke "a" using command down' | osascript`);
   await doStroke(strokes.delete);
 }
 
 async function sleep(ms: number) {
-  await new Promise(resolve => setTimeout(resolve, ms));
+  await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function autotype(details: AccountDetails, key: string) {
@@ -91,4 +90,3 @@ export async function autotype(details: AccountDetails, key: string) {
     }
   }
 }
-

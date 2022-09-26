@@ -20,33 +20,31 @@ function entryFrom(line: string): GopassAccount | undefined {
   return {
     accountKey: line,
     path,
-    name
-  }
+    name,
+  };
 }
 
 export async function listAccounts(): Promise<GopassAccount[]> {
-  const result = await asyncExec('gopass list --flat');
+  const result = await asyncExec("gopass list --flat");
   const lines = result.split("\n");
-  return lines
-    .map(entryFrom)
-    .filter((it): it is GopassAccount => it !== undefined);
+  return lines.map(entryFrom).filter((it): it is GopassAccount => it !== undefined);
 }
 
 export async function accountDetails(key: string): Promise<AccountDetails> {
-  const result = await asyncExec(`gopass show -n ${ key }`);
+  const result = await asyncExec(`gopass show -n ${key}`);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pass, _delimiter, ...rest] = result.split("\n");
 
   const entries = rest
-    .map(line => line.split(/:(.*)/s).map(part => part.trim()))
-    .filter(line => line.length >= 2);
+    .map((line) => line.split(/:(.*)/s).map((part) => part.trim()))
+    .filter((line) => line.length >= 2);
   return {
     accountKey: key,
     values: {
       pass,
-      ...Object.fromEntries(entries)
-    }
-  }
+      ...Object.fromEntries(entries),
+    },
+  };
 }
 
 export async function openEditor(key: string) {
@@ -57,6 +55,6 @@ export async function openEditor(key: string) {
         write text "gopass edit ${key}"
     end tell
   end tell
-  `
-  await asyncExec(`echo '${command}' | osascript`)
+  `;
+  await asyncExec(`echo '${command}' | osascript`);
 }
